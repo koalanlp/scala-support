@@ -1,6 +1,6 @@
 package kr.bydelta.koala
 
-import kr.bydelta.koala.data.{Morpheme, Sentence, Word}
+import kr.bydelta.koala.data.{Sentence, Word}
 import kr.bydelta.koala.proc._
 
 import scala.collection.JavaConverters._
@@ -512,55 +512,14 @@ object Implicits {
       * @throws IllegalArgumentException 초성, 중성, 종성이 지정된 범위가 아닌 경우 발생합니다.
       * @return 초성, 중성, 종성을 조합하여 문자를 만듭니다.
       */
-    def assembleHangul: Char = {
-      val t: (Character, Character, Character) = (triple._1, triple._2, triple._3.orNull[Character])
-      ExtUtil.assembleHangul(scalaTripleToKotlinTriple(t))
-    }
-  }
-
-  implicit class TextProcessingExtension(text: String){
-
-    def sentences(implicit splitter: CanSplitSentence): Seq[String] = splitter(text)
-
-    def withTag(implicit tagger: CanTag): Seq[Sentence] = tagger(text)
-
-    def withSyntaxTree(implicit parser: CanParseSyntax[_]): Seq[Sentence] = parser(text)
-
-    def withDepTree(implicit parser: CanParseDependency[_]): Seq[Sentence] = parser(text)
-
-    def withRoleTree(implicit parser: CanLabelSemanticRole[_]): Seq[Sentence] = parser(text)
-
-    def withEntities(implicit parser: CanRecognizeEntity[_]): Seq[Sentence] = parser(text)
-  }
-
-  implicit class SentenceProcessingExtension(text: Sentence){
-
-    def sentences: Seq[Sentence] = SentenceSplitter.INSTANCE.invoke(text) //TODO Fix core: add @JVMStatic annotation
-
-    def withSyntaxTree(implicit parser: CanParseSyntax[_]): Sentence = parser(text)
-
-    def withDepTree(implicit parser: CanParseDependency[_]): Sentence = parser(text)
-
-    def withRoleTree(implicit parser: CanLabelSemanticRole[_]): Sentence = parser(text)
-
-    def withEntities(implicit parser: CanRecognizeEntity[_]): Sentence = parser(text)
-  }
-
-  implicit class SentenceSeqProcessingExtension(text: Seq[Sentence]){
-    def withSyntaxTree(implicit parser: CanParseSyntax[_]): Seq[Sentence] = parser(text)
-
-    def withDepTree(implicit parser: CanParseDependency[_]): Seq[Sentence] = parser(text)
-
-    def withRoleTree(implicit parser: CanLabelSemanticRole[_]): Seq[Sentence] = parser(text)
-
-    def withEntities(implicit parser: CanRecognizeEntity[_]): Seq[Sentence] = parser(text)
-  }
-
-  object Word{
-    def unapplySeq(arg: Word): Option[(String, Seq[Morpheme])] = Some(arg.getSurface, arg)
-  }
-
-  object Morpheme{
-    def unapply(arg: Morpheme): Option[(String, POS)] = Some(arg.getSurface, arg.getTag)
+    def assembleHangul: Char =
+      triple._3 match {
+        case Some(jong) =>
+          val t: (Character, Character, Character) = (triple._1, triple._2, jong)
+          ExtUtil.assembleHangul(scalaTripleToKotlinTriple(t))
+        case _ =>
+          val t: (Character, Character, Character) = (triple._1, triple._2, null)
+          ExtUtil.assembleHangul(scalaTripleToKotlinTriple(t))
+      }
   }
 }
