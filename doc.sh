@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-JAR_VER=$(cat build.sbt | grep "version := " | cut -d= -f$'"' | cut -d- -f1)
+JAR_VER=$(cat build.sbt | grep "version := " | cut -d$'"' -f2 | cut -d- -f1)
 DATE=`date +%D`
 
 function run_sbt(){
