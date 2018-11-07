@@ -3,12 +3,12 @@
 SCALA_VERS=$(cat build.sbt | grep crossScalaVersions | cut -d\" -f2,4 --output-delim=$' ')
 
 function run_sbt(){
-  java -jar ~/.IntelliJIdea2017.3/system/sbt/sbt-launch.jar $@
+  java -jar ~/.IdeaIC2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
 }
 
 extract_version()
 {
-    JAR_VER=$(cat build.sbt | grep "val VERSION" | cut -d\" -f2 | cut -d- -f1)
+    JAR_VER=$(cat build.sbt | grep "version :=" | cut -d\" -f2 | cut -d- -f1)
     JAR_VER_MAJOR=$(echo $JAR_VER | cut -d. -f1)
     JAR_VER_MINOR=$(echo $JAR_VER | cut -d. -f2)
     JAR_VER_INCRM=$(echo $JAR_VER | cut -d. -f3)
@@ -27,15 +27,10 @@ add_minor_ver()
 
 set_version()
 {
-    cat build.sbt | sed -e 's/val VERSION\s*=\s*".*"/val VERSION = "'$1'"/g' > build_new.sbt
+    cat build.sbt | sed -e 's/version\s*:=\s*".*"/version := "'$1'"/g' > build_new.sbt
     rm build.sbt
     mv build_new.sbt build.sbt
     git add build.sbt
-}
-
-read_module_name()
-{
-    MODULE_NAME=$(cat settings.gradle | grep ":$1" | cut -d\' -f4)
 }
 
 ask_proceed()
@@ -53,7 +48,6 @@ case $1 in
         ;;
     all)
         extract_version
-        MODULES=`ls */build.gradle | cut -d/ -f1`
 
         # reset version code
         echo BUILD $JAR_VER_CURRENT
@@ -72,6 +66,11 @@ case $1 in
         fi
 
         echo UPLOAD FINISHED
+
+        ask_proceed "RELEASE"
+        if [ "${YN,,}" != "p" ]; then
+            run_sbt "sonatypeReleaseAll kr.bydelta"
+        fi
 
         ask_proceed "SET NEXT"
         if [ "${YN,,}" != "p" ]; then
