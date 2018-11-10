@@ -69,7 +69,7 @@ case $1 in
 
         ask_proceed "RELEASE"
         if [ "${YN,,}" != "p" ]; then
-            run_sbt "sonatypeReleaseAll kr.bydelta"
+            run_sbt "sonatypeReleaseAll"
         fi
 
         ask_proceed "SET NEXT"
