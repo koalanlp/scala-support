@@ -57,6 +57,10 @@ KoalaNLP
 * Daon: 지정된 조항 없음
 * ETRI: 별도 API 키 발급 동의 필요
 
+# 사용방법
+상세한 사용법은 [Usage](https://koalanlp.github.io/koalanlp/usage/) 또는 [Kotlin API Doc](http://koalanlp.github.io/koalanlp/api/koalanlp/index.html), 
+[Scala Support API Doc](https://koalanlp.github.io/scala-support/api/)을 참고하십시오.
+
 # Dependency 추가
 
 ## Java 패키지 목록
@@ -120,71 +124,4 @@ libraryDependencies += "kr.bydelta" % "koalanlp-hannanum" % koalaVer classifier 
 
 // ETRI 분석기의 경우
 libraryDependencies += "kr.bydelta" % "koalanlp-etri" % koalaVer
-```
-
-# 사용방법
-아래에는 대표적인 특징만 기술되어 있습니다.
-
-상세한 사항은 [Usage](https://koalanlp.github.io/koalanlp/usage/) 또는 [Kotlin API Doc](http://koalanlp.github.io/koalanlp/api/koalanlp/index.html), 
-[Scala Support API Doc](https://koalanlp.github.io/scala-support/api/)을 참고하십시오.
-
-## 여러 패키지의 사용
-통합 인터페이스는 여러 패키지간의 호환이 가능하게 설계되어 있습니다. 이론적으로는 타 패키지의 품사 분석 결과를 토대로 구문 분석이 가능합니다.
-> __Note:__
-> * 본 분석의 결과는 검증되지 않았습니다.
-> * 신조어 등으로 인해 한나눔이나 꼬꼬마에서 품사 분석이 제대로 수행되지 않을 경우를 위한 기능입니다.
-> * 사용자 정의 사전은 `Tagger`와 `Parser`의 대상이 되는 패키지에 모두에 추가하여야 합니다.
-> * 타 패키지의 분석 결과는 ETRI 분석기의 입력으로 쓸 수 없습니다.
-
-### Kotlin
-```kotlin
-/* 패키지 명: 한나눔(hnn), 코모란(kmr), 꼬꼬마(kkma), 은전한닢(eunjeon), 트위터(twt), 아리랑(arirang) */
-// 예시에서는 트위터 문장분석기, 은전한닢 품사 분석, 꼬꼬마 구문 분석을 진행함.
-import kr.bydelta.koala.twt.SentenceSplitter
-import kr.bydelta.koala.eunjeon.Tagger
-import kr.bydelta.koala.kkma.Parser
-
-val splitter = SentenceSplitter()
-val tagger = Tagger()
-val parser = Parser()
-
-val paragraph = "누군가가 말했다. Python에는 KoNLPy가 있다. Kotlin은 KoalaNLP가 있다."
-val sentences = splitter(paragraph)
-val tagged = sentences.map{ tagger.tagSentence(it) }
-val parsed = tagged.map{ parser.parse(it) }
-```
-
-### Scala
-```scala
-import kr.bydelta.koala.twt.SentenceSplitter
-import kr.bydelta.koala.eunjeon.Tagger
-import kr.bydelta.koala.kkma.Parser
-
-val splitter = new SentenceSplitter
-val tagger = new Tagger
-val parser = new Parser
-
-val paragraph = "누군가가 말했다. Python에는 KoNLPy가 있다. Scala는 KoalaNLP가 있었다."
-val sentences = splitter.invoke(paragraph)
-val tagged = sentences.map(tagger.tagSentence)
-val parsed = tagged.map(parser.parse)
-```
-
-### Java
-```java
-import kr.bydelta.koala.twt.SentenceSplitter;
-import kr.bydelta.koala.eunjeon.Tagger;
-import kr.bydelta.koala.kkma.Parser;
-import kr.bydelta.koala.Sentence;
-
-SentenceSplitter splitter = new SentenceSplitter();
-Tagger tagger = new Tagger();
-Tagger parser = new Parser();
-
-String paragraph = "누군가가 말했다. Python에는 KoNLPy가 있다. Java는 KoalaNLP가 있었다.";
-List<String> sentences = splitter.invoke(paragraph);
-for(String line : sentences){
-  Sentence tagged = tagger.tagSentence(line);
-  Sentence parsed = parser.parse(tagged);
-}
 ```

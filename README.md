@@ -38,7 +38,6 @@ KoalaNLP
 
    KoalaNLP는 여러 프로그래밍 언어에서 사용할 수 있습니다. 어디서 개발을 하더라도 크게 코드가 다르지 않습니다. 
 
-
 # License 조항
 
 이 프로젝트 자체(KoalaNLP-core, koalanlp-scala)와 인터페이스 통합을 위한 코드는
@@ -56,6 +55,10 @@ KoalaNLP
 * RHINO: [GPL v3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)) (참고: 다운로드 위치별로 조항 상이함)
 * Daon: 지정된 조항 없음
 * ETRI: 별도 API 키 발급 동의 필요
+
+# 사용방법
+상세한 사용법은 [Usage](https://koalanlp.github.io/koalanlp/usage/) 또는 [Kotlin API Doc](http://koalanlp.github.io/koalanlp/api/koalanlp/index.html), 
+[Scala Support API Doc](https://koalanlp.github.io/scala-support/api/)을 참고하십시오.
 
 # Dependency 추가
 
@@ -121,7 +124,3 @@ libraryDependencies += "kr.bydelta" % "koalanlp-hannanum" % koalaVer classifier 
 // ETRI 분석기의 경우
 libraryDependencies += "kr.bydelta" % "koalanlp-etri" % koalaVer
 ```
-
-# 사용방법
-상세한 사용법은 [Usage](https://koalanlp.github.io/koalanlp/usage/) 또는 [Kotlin API Doc](http://koalanlp.github.io/koalanlp/api/koalanlp/index.html), 
-[Scala Support API Doc](https://koalanlp.github.io/scala-support/api/)을 참고하십시오.
