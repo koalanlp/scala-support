@@ -7,7 +7,7 @@ function run_sbt(){
   java -jar ~/.IdeaIC2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
 }
 
-run_sbt unidoc
+run_sbt doc
 git rm -r docs/api
 mv target/scala-2.12/api docs/api
 git add docs/api
