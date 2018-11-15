@@ -24,17 +24,22 @@ object Implicits {
   implicit def scalaPairToKotlinPair[A, B](pair: (A, B)): kotlin.Pair[A, B] =
     new kotlin.Pair(pair._1, pair._2)
 
+  /** java.util.List[A] --> Seq[A] */
   implicit def kotlinListToScalaSeq[A](list: java.util.List[A]): Seq[A] = list.asScala
 
+  /** java.util.List[A] <-- Seq[A] */
   implicit def scalaListToKotlinList[A](seq: Seq[A]): java.util.List[A] = seq.asJava
 
+  /** java.util.Iterable[A] <-- Iterable[A] */
   implicit def scalaIterableToKotlinIterable[A](it: Iterable[A]): java.lang.Iterable[A] = it.asJava
 
+  /** java.util.Set[A] --> Set[A] */
   implicit def kotlinSetToScalaSet[A](set: java.util.Set[A]): Set[A] = set.asScala.toSet
 
+  /** java.util.Set[A] <-- Set[A] */
   implicit def scalaSetToKotlinSet[A](set: Set[A]): java.util.Set[A] = set.asJava
 
-  /** 초성 문자를 종성 조합형 문자로 변경 */
+  /** 초성 문자를 종성 조합형 문자로 변경하는 Map */
   lazy val ChoToJong: Map[Char, Char] = ExtUtil.getChoToJong.asScala.map{
     case (from, to) => (from.asInstanceOf[Char], to.asInstanceOf[Char])
   }.toMap

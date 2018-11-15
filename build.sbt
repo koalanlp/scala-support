@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
 
 publishArtifact in Test := false
 
-apiURL := Some(url("https://koalanlp.github.io/scala-support/api/scala/"))
+apiURL := Some(url("https://koalanlp.github.io/scala-support/api/"))
 homepage := Some(url("http://koalanlp.github.io/koalanlp"))
 
 publishTo := version { v: String =>
