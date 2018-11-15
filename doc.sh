@@ -4,7 +4,7 @@ JAR_VER=$(cat build.sbt | grep "version := " | cut -d$'"' -f2 | cut -d- -f1)
 DATE=`date +%D`
 
 function run_sbt(){
-  java -jar ~/.IntelliJIdea2017.3/system/sbt/sbt-launch.jar $@
+  java -jar ~/.IdeaIC2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
 }
 
 run_sbt unidoc
