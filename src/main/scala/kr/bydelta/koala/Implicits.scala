@@ -542,6 +542,7 @@ object Implicits {
       * @throws IllegalArgumentException 초성, 중성, 종성이 지정된 범위가 아닌 경우 발생합니다.
       * @return 초성, 중성, 종성을 조합하여 문자를 만듭니다.
       */
+    @throws[IllegalArgumentException]
     def assembleHangul: Char =
       triple._3 match {
         case Some(jong) =>
