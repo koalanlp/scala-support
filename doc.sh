@@ -8,7 +8,7 @@ function run_sbt(){
 }
 
 run_sbt unidoc
-git rm docs/api
+git rm -r docs/api
 mv target/scala-2.12/api docs/api
 git add docs/api
 git commit -a -m "Documentation of v$JAR_VER at $DATE"
