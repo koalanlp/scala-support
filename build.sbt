@@ -10,7 +10,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-language:implicitConversio
 scalacOptions in Test ++= Seq("-Yrangepos")
 
 libraryDependencies ++= Seq(
-  "kr.bydelta" % "koalanlp-core" % "2.0.0",
+  "kr.bydelta" % "koalanlp-core" % "2.0.1",
   "org.specs2" %% "specs2-core" % "3.9.5" % "test"
 )
 

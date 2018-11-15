@@ -42,6 +42,17 @@ object Implicits {
 
   implicit def scalaSetToKotlinSet[A](set: Set[A]): java.util.Set[A] = set.asJava
 
+  val ChoToJong: Map[Char, Char] = ExtUtil.getChoToJong().asScala
+
+  val HanFirstList: Seq[Char] = ExtUtil.getHanFirstList()
+
+  val HanSecondList: Seq[Char] = ExtUtil.getHanSecondList()
+
+  val HanLastList: Seq[Option[Char]] = ExtUtil.getHanLastList().map{
+    case null => Option.empty
+    case char: Char => Option(char)
+  }
+
   /** CanSplitSentence의 Extension */
   implicit class CanSplitInScala(splitter: CanSplitSentence){
     /**
@@ -123,7 +134,10 @@ object Implicits {
       * */
     def dissembleHangul: (Char, Char, Option[Char]) = {
       val triple = ExtUtil.dissembleHangul(ch)
-      (triple.getFirst, triple.getSecond, Option(triple.getThird))
+      triple.getThird match {
+        case null => (triple.getFirst, triple.getSecond, Option.empty[Char])
+        case char: Char => (triple.getFirst, triple.getSecond, Option(char))
+      }
     }
 
     /** 현재 문자에서 초성 자음문자를 분리합니다. 초성이 없으면 None.
@@ -137,7 +151,10 @@ object Implicits {
       * @since 2.0.0
       * @return [Char.isChosungJamo]가 참이면 문자를 그대로, [Char.isCompleteHangul]이 참이면 초성 문자를 분리해서 (0x1100-0x1112 대역), 아니라면 None.
       * */
-    def getChosung: Option[Char] = Option(ExtUtil.getChosung(ch))
+    def getChosung: Option[Char] = ExtUtil.getChosung(ch) match {
+      case null => Option.empty
+      case char: Char => Option(char)
+    }
 
     /** 현재 문자에서 종성 자음문자를 분리합니다. 종성이 없으면 None.
       *
@@ -150,7 +167,10 @@ object Implicits {
       * @since 2.0.0
       * @return [Char.isJongsungJamo]가 참이면 문자를 그대로, [Char.isJongsungEnding]이 참이면 종성 문자를 분리해서 (0x11A7-0x11C2 대역), 아니라면 None.
       * */
-    def getJongsung: Option[Char] = Option(ExtUtil.getJongsung(ch))
+    def getJongsung: Option[Char] = ExtUtil.getJongsung(ch) match {
+      case null => Option.empty
+      case char: Char => Option(char)
+    }
 
     /** 현재 문자에서 중성 모음문자를 분리합니다. 중성이 없으면 None.
       *
@@ -163,7 +183,10 @@ object Implicits {
       * @since 2.0.0
       * @return [Char.isJungsungJamo]가 참이면 문자를 그대로, [Char.isCompleteHangul]이 참이면 중성 문자를 분리해서 (0x1161-0x1175 대역), 아니라면 None.
       * */
-    def getJungsung: Option[Char] = Option(ExtUtil.getJungsung(ch))
+    def getJungsung: Option[Char] = ExtUtil.getJungsung(ch) match {
+      case null => Option.empty
+      case char: Char => Option(char)
+    }
 
     /** 현재 문자가 한중일 통합한자, 통합한자 확장 - A, 호환용 한자 범위인지 확인합니다.
       * (국사편찬위원회 한자음가사전은 해당 범위에서만 정의되어 있어, 별도 확인합니다.)
@@ -521,5 +544,9 @@ object Implicits {
           val t: (Character, Character, Character) = (triple._1, triple._2, null)
           ExtUtil.assembleHangul(scalaTripleToKotlinTriple(t))
       }
+  }
+
+  object Dictionary extends CanCompileDict{
+    def addUserDictionary
   }
 }
