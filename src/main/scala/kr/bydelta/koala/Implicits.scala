@@ -48,7 +48,7 @@ object Implicits {
   /** 종성 조합형 문자열 리스트 (UNICODE 순서). 가장 첫번째는 None (받침 없음) */
   lazy val HanLastList: Array[Option[Char]] = ExtUtil.getHanLastList.map{
     case null => Option.empty
-    case char: Character => Option(Char(char))
+    case char: Character => Option(char.asInstanceOf[Char])
   }
 
   /** CanSplitSentence의 Extension */
