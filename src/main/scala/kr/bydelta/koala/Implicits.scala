@@ -1,5 +1,7 @@
 package kr.bydelta.koala
 
+import java.util
+
 import kr.bydelta.koala.data.{Sentence, Word}
 import kr.bydelta.koala.proc._
 
@@ -22,16 +24,6 @@ object Implicits {
   implicit def scalaPairToKotlinPair[A, B](pair: (A, B)): kotlin.Pair[A, B] =
     new kotlin.Pair(pair._1, pair._2)
 
-  /** Kotlin function A -> B <-- A => B */
-  implicit def scalaFuncToKotlinFunc[A, B](fun: Function1[A, B]): kotlin.jvm.functions.Function1[A, B] =
-    new kotlin.jvm.functions.Function1[A, B](){
-      override def invoke(p1: A): B = fun(p1)
-    }
-
-  /** Kotlin function A -> B --> A => B */
-  implicit def kotlinFuncToScalaFunc[A, B](fun: kotlin.jvm.functions.Function1[A, B]): Function1[A, B] =
-    (p1: A) => fun.invoke(p1)
-
   implicit def kotlinListToScalaSeq[A](list: java.util.List[A]): Seq[A] = list.asScala
 
   implicit def scalaListToKotlinList[A](seq: Seq[A]): java.util.List[A] = seq.asJava
@@ -42,15 +34,21 @@ object Implicits {
 
   implicit def scalaSetToKotlinSet[A](set: Set[A]): java.util.Set[A] = set.asJava
 
-  val ChoToJong: Map[Char, Char] = ExtUtil.getChoToJong().asScala
+  /** 초성 문자를 종성 조합형 문자로 변경 */
+  lazy val ChoToJong: Map[Char, Char] = ExtUtil.getChoToJong.asScala.map{
+    case (from, to) => (from.asInstanceOf[Char], to.asInstanceOf[Char])
+  }.toMap
 
-  val HanFirstList: Seq[Char] = ExtUtil.getHanFirstList()
+  /** 초성 조합형 문자열 리스트 (UNICODE 순서) */
+  lazy val HanFirstList: Array[Char] = ExtUtil.getHanFirstList.map{ _.asInstanceOf[Char] }
 
-  val HanSecondList: Seq[Char] = ExtUtil.getHanSecondList()
+  /** 중성 조합형 문자열 리스트 (UNICODE 순서) */
+  lazy val HanSecondList: Array[Char] = ExtUtil.getHanSecondList.map{ _.asInstanceOf[Char] }
 
-  val HanLastList: Seq[Option[Char]] = ExtUtil.getHanLastList().map{
+  /** 종성 조합형 문자열 리스트 (UNICODE 순서). 가장 첫번째는 None (받침 없음) */
+  lazy val HanLastList: Array[Option[Char]] = ExtUtil.getHanLastList.map{
     case null => Option.empty
-    case char: Char => Option(char)
+    case char: Character => Option(Char(char))
   }
 
   /** CanSplitSentence의 Extension */
@@ -66,7 +64,7 @@ object Implicits {
   }
 
   /** SentenceSplitter의 Extension */
-  implicit class CanSplitTagsInScala(splitter: SentenceSplitter){
+  object SentenceSplitter{
     /**
       * 분석결과를 토대로 문장을 분리함.
       *
@@ -74,7 +72,16 @@ object Implicits {
       * @param para 분리할 문단.
       * @return 문장단위로 분리된 결과
       */
-    def apply(para: Iterable[Word]): Seq[Sentence] = splitter.invoke(para)
+    def apply(para: Iterable[Word]): Seq[Sentence] = proc.SentenceSplitter.invoke(para)
+
+    /**
+      * 분석결과를 토대로 문장을 분리함.
+      *
+      * @since 2.0.0
+      * @param para 분리할 문단.
+      * @return 문장단위로 분리된 결과
+      */
+    def sentences(para: Iterable[Word]): Seq[Sentence] = proc.SentenceSplitter.invoke(para)
   }
 
   /** CanTag의 Extension */
@@ -136,7 +143,7 @@ object Implicits {
       val triple = ExtUtil.dissembleHangul(ch)
       triple.getThird match {
         case null => (triple.getFirst, triple.getSecond, Option.empty[Char])
-        case char: Char => (triple.getFirst, triple.getSecond, Option(char))
+        case char: Character => (triple.getFirst, triple.getSecond, Option(char.asInstanceOf[Char]))
       }
     }
 
@@ -153,7 +160,7 @@ object Implicits {
       * */
     def getChosung: Option[Char] = ExtUtil.getChosung(ch) match {
       case null => Option.empty
-      case char: Char => Option(char)
+      case char: Character => Option(char.asInstanceOf[Char])
     }
 
     /** 현재 문자에서 종성 자음문자를 분리합니다. 종성이 없으면 None.
@@ -169,7 +176,7 @@ object Implicits {
       * */
     def getJongsung: Option[Char] = ExtUtil.getJongsung(ch) match {
       case null => Option.empty
-      case char: Char => Option(char)
+      case char: Character => Option(char.asInstanceOf[Char])
     }
 
     /** 현재 문자에서 중성 모음문자를 분리합니다. 중성이 없으면 None.
@@ -185,7 +192,7 @@ object Implicits {
       * */
     def getJungsung: Option[Char] = ExtUtil.getJungsung(ch) match {
       case null => Option.empty
-      case char: Char => Option(char)
+      case char: Character => Option(char.asInstanceOf[Char])
     }
 
     /** 현재 문자가 한중일 통합한자, 통합한자 확장 - A, 호환용 한자 범위인지 확인합니다.
@@ -546,7 +553,183 @@ object Implicits {
       }
   }
 
+  type POSFilter = kotlin.jvm.functions.Function1[_ >: POS, java.lang.Boolean]
+
   object Dictionary extends CanCompileDict{
-    def addUserDictionary
+    private var dict: CanCompileDict = _
+
+    def use(dict: CanCompileDict): Unit ={
+      this.dict = dict
+    }
+
+    /**
+      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가합니다.
+      *
+      * @param pairs 추가할 (표면형, 품사)의 순서쌍들 (가변인자). 즉, [Pair]<[String], [POS]>들
+      */
+    override def addUserDictionary(pairs: kotlin.Pair[String, _ <: POS]*): Unit =
+      dict.addUserDictionary(pairs:_*)
+
+    /**
+      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가합니다.
+      *
+      * @param pairs 추가할 (표면형, 품사)의 순서쌍들 (가변인자). 즉, [Pair]<[String], [POS]>들
+      */
+    def addUserDictionary(pairs: (String, POS)*): Unit =
+      addUserDictionary(pairs.map(scalaPairToKotlinPair):_*)
+
+    /**
+      * 사용자 사전에, 표면형과 그 품사를 추가합니다.
+      *
+      * @param morph 표면형 [String]
+      * @param tag   품사: [POS] Enum 값.
+      */
+    override def addUserDictionary(morph: String, tag: POS): Unit =
+      dict.addUserDictionary(morph, tag)
+
+    /**
+      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가.
+      *
+      * @param morphs 추가할 단어의 표면형의 목록.
+      * @param tags   추가할 단어의 품사의 목록.
+      */
+    override def addUserDictionary(morphs: util.List[String], tags: util.List[_ <: POS]): Unit =
+      dict.addUserDictionary(morphs, tags)
+
+    /**
+      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가.
+      *
+      * @param morphs 추가할 단어의 표면형의 목록.
+      * @param tags   추가할 단어의 품사의 목록.
+      */
+    def addUserDictionary(morphs: Seq[String], tags: Seq[POS]): Unit =
+      addUserDictionary(scalaListToKotlinList(morphs), scalaListToKotlinList(tags))
+
+    /**
+      * 사전에 등재되어 있는지 확인합니다. 품사 후보 [posTag] 중의 하나라도 참이면 참이라고 판정합니다.
+      *
+      * @param word   확인할 형태소
+      * @param posTag 품사들 후보
+      */
+    override def contains(word: String, posTag: util.Set[_ <: POS]): Boolean =
+      dict.contains(word, posTag)
+
+    /**
+      * 사전에 등재되어 있는지 확인합니다. 품사 후보 [posTag] 중의 하나라도 참이면 참이라고 판정합니다.
+      *
+      * @param word   확인할 형태소
+      * @param posTag 품사들 후보(기본값: [POS.NNP] 고유명사, [POS.NNG] 일반명사)
+      */
+    def contains(word: String, posTag: Set[POS] = Set(POS.NNP, POS.NNG)): Boolean =
+      contains(word, scalaSetToKotlinSet(posTag))
+
+    /**
+      * 사전에 등재되어 있는지 확인합니다.
+      *
+      * @param entry 확인할 형태소, 품사의 순서쌍
+      */
+    override def contains(entry: kotlin.Pair[String, _ <: POS]): Boolean =
+      dict.contains(entry)
+
+    /**
+      * 사전에 등재되어 있는지 확인합니다.
+      *
+      * @param entry 확인할 형태소, 품사의 순서쌍
+      */
+    def contains(entry: (String, POS)): Boolean = contains(scalaPairToKotlinPair(entry))
+
+    /**
+      * 원본 사전에 등재된 항목 중에서, 지정된 형태소의 항목만을 가져옵니다. (복합 품사 결합 형태는 제외)
+      *
+      * @param filter 가져올 품사인지 판단하는 함수.
+      * @return (형태소, 품사)의 Iterator.
+      */
+    override def getBaseEntries(filter: POSFilter):
+    util.Iterator[kotlin.Pair[String, POS]] =
+      dict.getBaseEntries(filter)
+
+    /**
+      * 원본 사전에 등재된 항목 중에서, 지정된 형태소의 항목만을 가져옵니다. (복합 품사 결합 형태는 제외)
+      *
+      * @param filter 가져올 품사인지 판단하는 함수.
+      * @return (형태소, 품사)의 Iterator.
+      */
+    def getBaseEntries(filter: POS => Boolean): Iterator[(String, POS)] =
+      dict.getBaseEntries((p: POS) => filter(p)).asScala.map(kotlinPairToScalaTuple)
+
+    /**
+      * 사용자 사전에 등재된 모든 Item을 불러옵니다.
+      *
+      * @return (형태소, 통합품사)의 Sequence.
+      */
+    override def getItems: util.Set[kotlin.Pair[String, POS]] = dict.getItems
+
+    /**
+      * 사전에 등재되어 있는지 확인하고, 사전에 없는단어만 반환합니다.
+      *
+      * @param onlySystemDic 시스템 사전에서만 검색할지 결정합니다.
+      * @param word          확인할 (형태소, 품사)들.
+      * @return 사전에 없는 단어들, 즉, [Pair]<[String], [POS]>들.
+      */
+    override def getNotExists(onlySystemDic: Boolean, word: kotlin.Pair[String, _ <: POS]*):
+    Array[kotlin.Pair[String, POS]] =
+      dict.getNotExists(onlySystemDic, word:_*)
+
+    /**
+      * 사전에 등재되어 있는지 확인하고, 사전에 없는단어만 반환합니다.
+      *
+      * @param onlySystemDic 시스템 사전에서만 검색할지 결정합니다.
+      * @param word          확인할 (형태소, 품사)들.
+      * @return 사전에 없는 단어들, 즉, [Pair]<[String], [POS]>들.
+      */
+    def getNotExists(onlySystemDic: Boolean, word: (String, POS)*): Array[(String, POS)] =
+      dict.getNotExists(onlySystemDic, word.map(scalaPairToKotlinPair):_*).map(kotlinPairToScalaTuple)
+
+    /**
+      * 다른 사전을 참조하여, 선택된 사전에 없는 단어를 사용자사전으로 추가합니다.
+      *
+      * @param dict       참조할 사전
+      * @param fastAppend 선택된 사전에 존재하는지를 검사하지 않고, 빠르게 추가하고자 할 때 (기본값 false)
+      * @param filter     추가할 품사를 지정하는 함수. (기본값 [POS.isNoun])
+      */
+    override def importFrom(dict: CanCompileDict, fastAppend: Boolean, filter: POSFilter): Unit =
+      this.dict.importFrom(dict, fastAppend, filter)
+
+    /**
+      * 다른 사전을 참조하여, 선택된 사전에 없는 단어를 사용자사전으로 추가합니다.
+      *
+      * @param dict       참조할 사전
+      * @param fastAppend 선택된 사전에 존재하는지를 검사하지 않고, 빠르게 추가하고자 할 때 (기본값 false)
+      * @param filter     추가할 품사를 지정하는 함수. (기본값 [POS.isNoun])
+      */
+    def importFrom(dict: CanCompileDict, fastAppend: Boolean, filter: POS => Boolean): Unit =
+      this.dict.importFrom(dict, fastAppend, (p: POS) => Boolean.box(filter(p)))
+
+    /**
+      * 다른 사전을 참조하여, 선택된 사전에 없는 체언([POS.isNoun]이 true인 값)을 사용자사전으로 추가합니다.
+      *
+      * - 추가시에 선택된 사전에 존재하는지를 검사하여, 없는 값만 삽입합니다.
+      *
+      * @param dict       참조할 사전
+      */
+    override def importFrom(dict: CanCompileDict): Unit = this.dict.importFrom(dict)
+
+    /**
+      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가.
+      *
+      * @param entry 추가할 (표면형,품사)의 순서쌍. 즉, [Pair]<[String], [POS]>.
+      */
+    override def plusAssign(entry: kotlin.Pair[String, _ <: POS]): Unit = dict.plusAssign(entry)
+
+    /**
+      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가.
+      *
+      * @param entry 추가할 (표면형,품사)의 순서쌍. 즉, [Pair]<[String], [POS]>.
+      */
+    def +=(entry: (String, POS)): this.type = {
+      dict.plusAssign(entry)
+
+      this
+    }
   }
 }
