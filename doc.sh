@@ -9,6 +9,6 @@ function run_sbt(){
 
 run_sbt doc
 git rm -r docs/api
-mv target/scala-2.12/api docs/api
+mv target/scala-2.12/api docs
 git add docs/api
 git commit -a -m "Documentation of v$JAR_VER at $DATE"
