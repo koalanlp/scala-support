@@ -13,7 +13,9 @@ function run_sbt(){
 }
 
 run_sbt ++2.12.0 clean doc
+mv docs/api/.nojekyll docs/
 git rm -r docs/api
 mv target/scala-2.12/api docs
 git add docs/api
+mv docs/.nojekyll docs/api
 git commit -a -m "Documentation of v$JAR_VER at $DATE"
