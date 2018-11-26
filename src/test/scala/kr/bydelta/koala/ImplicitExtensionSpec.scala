@@ -109,7 +109,7 @@ object ImplicitExtensionSpec extends Specification {
 
   "CanSplitSentence" should {
     "provide apply()" in {
-      val sentenceSplitter = new okt.SentenceSplitter()
+      val sentenceSplitter = new hnn.SentenceSplitter()
       val text = "싸구려 커피를 마신다. 적잖이 속이 쓰려온다."
 
       val scalaResult = sentenceSplitter(text)
@@ -126,7 +126,7 @@ object ImplicitExtensionSpec extends Specification {
 
   "CanTag" should {
     "provide apply()" in {
-      val tagger = new eunjeon.Tagger()
+      val tagger = new kmr.Tagger()
       val text = "싸구려 커피를 마신다. 적잖이 속이 쓰려온다."
 
       val scalaResult = tagger(text)
@@ -160,7 +160,7 @@ object ImplicitExtensionSpec extends Specification {
 
   "SentenceSplitter" should {
     "provide apply()" in {
-      val tagger = new okt.Tagger()
+      val tagger = new kmr.Tagger()
       val text = tagger.tagSentence("싸구려 커피를 마신다. 적잖이 속이 쓰려온다.")
 
       val scalaResult = Implicits.SentenceSplitter(text)
@@ -176,7 +176,7 @@ object ImplicitExtensionSpec extends Specification {
   }
 
   "Dictionary" should {
-    Dictionary.use(eunjeon.Dictionary.INSTANCE)
+    Dictionary.use(hnn.Dictionary.INSTANCE)
     "adds a noun" in {
       Dictionary.addUserDictionary("갑질", POS.NNG) should not(throwAn[Exception])
       Dictionary.getNotExists(false, "갑질" -> POS.NNG).length shouldEqual 0
@@ -222,7 +222,7 @@ object ImplicitExtensionSpec extends Specification {
       }
 
       Result.unit {
-        targets.forEach { it =>
+        targets.foreach { it =>
           println(s"Userdic Testing: $it")
           Dictionary.contains(it._1, Set(it._2)) should beTrue
           Dictionary.contains(it) should beTrue
@@ -234,7 +234,7 @@ object ImplicitExtensionSpec extends Specification {
 
     // importFrom
     "import from other dictionary" in {
-      Dictionary.importFrom(okt.Dictionary.INSTANCE) should not(throwAn[Exception])
+      Dictionary.importFrom(kmr.Dictionary.INSTANCE) should not(throwAn[Exception])
     }
   }
 

@@ -12,11 +12,12 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-language:implicitConversio
 scalacOptions in Test ++= Seq("-Yrangepos")
 resolvers += Resolver.JCenterRepository
 resolvers += Resolver.sonatypeRepo("snapshots")
+resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= Seq(
   "kr.bydelta" % "koalanlp-core" % "2.0.2",
-  "kr.bydelta" % "koalanlp-eunjeon" % "2.0.2" % "test",
-  "kr.bydelta" % "koalanlp-okt" % "2.0.2" % "test",
+  "kr.bydelta" % "koalanlp-hnn" % "2.0.2" % "test" classifier "assembly",
+  "kr.bydelta" % "koalanlp-kmr" % "2.0.2" % "test",
   "kr.bydelta" % "koalanlp-etri" % "2.0.2" % "test",
   "org.specs2" %% "specs2-core" % "3.9.5" % "test"
 )
