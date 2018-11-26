@@ -1,6 +1,8 @@
+import sbt.librarymanagement
+
 organization := "kr.bydelta"
 name := "koalanlp-scala"
-version := "2.0.1-SNAPSHOT"
+version := "2.0.2"
 
 scalaVersion := "2.12.0"
 crossScalaVersions := Seq("2.11.0", "2.12.0", "2.13.0")
@@ -8,9 +10,14 @@ autoAPIMappings := true
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-language:implicitConversions")
 scalacOptions in Test ++= Seq("-Yrangepos")
+resolvers += Resolver.JCenterRepository
+resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "kr.bydelta" % "koalanlp-core" % "2.0.1",
+  "kr.bydelta" % "koalanlp-core" % "2.0.2",
+  "kr.bydelta" % "koalanlp-eunjeon" % "2.0.2" % "test",
+  "kr.bydelta" % "koalanlp-okt" % "2.0.2" % "test",
+  "kr.bydelta" % "koalanlp-etri" % "2.0.2" % "test",
   "org.specs2" %% "specs2-core" % "3.9.5" % "test"
 )
 

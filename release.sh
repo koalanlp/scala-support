@@ -3,7 +3,12 @@
 SCALA_VERS=$(cat build.sbt | grep crossScalaVersions | cut -d\" -f2,4 --output-delim=$' ')
 
 function run_sbt(){
-  java -jar ~/.IdeaIC2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
+  if [ -d ~/.IntelliJIdea2018.2 ]
+  then
+    java -jar ~/.IntelliJIdea2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
+  else
+    java -jar ~/.IdeaIC2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
+  fi
 }
 
 extract_version()
@@ -43,9 +48,6 @@ ask_proceed()
 
 
 case $1 in
-    help)
-        echo ./release.sh "[help|all]"
-        ;;
     all)
         extract_version
 
@@ -74,6 +76,8 @@ case $1 in
 
         ask_proceed "SET NEXT"
         if [ "${YN,,}" != "p" ]; then
+            ./doc.sh
+
             add_incremental_ver
             set_version "$JAR_VER_NEXT-SNAPSHOT"
         fi
@@ -85,5 +89,8 @@ case $1 in
             git push origin master
             git push --tags
         fi
+        ;;
+    *)
+        echo ./release.sh "[help|all]"
         ;;
 esac

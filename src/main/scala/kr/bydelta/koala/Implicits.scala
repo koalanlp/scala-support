@@ -1,7 +1,8 @@
 package kr.bydelta.koala
 
-import java.util
+import java.{lang, util}
 
+import kotlin.jvm.functions
 import kr.bydelta.koala.data.{Sentence, Word}
 import kr.bydelta.koala.proc._
 
@@ -416,7 +417,8 @@ object Implicits {
       * @since 2.0.0
       * @return 해당 범위의 한자라면 true
       */
-    def hanjaToHangul(headCorrection: Boolean = true): CharSequence = ExtUtil.hanjaToHangul(str, headCorrection)
+    def hanjaToHangul(headCorrection: Boolean = true): CharSequence =
+      ExtUtil.hanjaToHangul(str, headCorrection)
 
     /**
       * 주어진 문자열이 알파벳이 발음되는 대로 표기된 문자열인지 확인합니다.
@@ -559,11 +561,19 @@ object Implicits {
       }
   }
 
+  /** 품사 필터 */
   type POSFilter = kotlin.jvm.functions.Function1[_ >: POS, java.lang.Boolean]
 
+  /**
+    * 사용자 사전의 Scala interface
+    */
   object Dictionary extends CanCompileDict{
     private var dict: CanCompileDict = _
 
+    /**
+      * 사용할 사전을 지정합니다.
+      * @param dict 사용할 사전 (Dictionary.INSTANCE)
+      */
     def use(dict: CanCompileDict): Unit ={
       this.dict = dict
     }
@@ -575,14 +585,6 @@ object Implicits {
       */
     override def addUserDictionary(pairs: kotlin.Pair[String, _ <: POS]*): Unit =
       dict.addUserDictionary(pairs:_*)
-
-    /**
-      * 사용자 사전에, (표면형,품사)의 여러 순서쌍을 추가합니다.
-      *
-      * @param pairs 추가할 (표면형, 품사)의 순서쌍들 (가변인자). 즉, [Pair]<[String], [POS]>들
-      */
-    def addUserDictionary(pairs: (String, POS)*): Unit =
-      addUserDictionary(pairs.map(scalaPairToKotlinPair):_*)
 
     /**
       * 사용자 사전에, 표면형과 그 품사를 추가합니다.
@@ -661,7 +663,9 @@ object Implicits {
       * @return (형태소, 품사)의 Iterator.
       */
     def getBaseEntries(filter: POS => Boolean): Iterator[(String, POS)] =
-      dict.getBaseEntries((p: POS) => filter(p)).asScala.map(kotlinPairToScalaTuple)
+      dict.getBaseEntries(new functions.Function1[POS, java.lang.Boolean] {
+        override def invoke(p1: POS): java.lang.Boolean = Boolean.box(filter(p1))
+      }).asScala.map(kotlinPairToScalaTuple)
 
     /**
       * 사용자 사전에 등재된 모든 Item을 불러옵니다.
@@ -709,7 +713,9 @@ object Implicits {
       * @param filter     추가할 품사를 지정하는 함수. (기본값 [POS.isNoun])
       */
     def importFrom(dict: CanCompileDict, fastAppend: Boolean, filter: POS => Boolean): Unit =
-      this.dict.importFrom(dict, fastAppend, (p: POS) => Boolean.box(filter(p)))
+      this.dict.importFrom(dict, fastAppend, new functions.Function1[POS, java.lang.Boolean] {
+        override def invoke(p1: POS): java.lang.Boolean = Boolean.box(filter(p1))
+      })
 
     /**
       * 다른 사전을 참조하여, 선택된 사전에 없는 체언([POS.isNoun]이 true인 값)을 사용자사전으로 추가합니다.
