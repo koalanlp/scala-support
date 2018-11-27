@@ -1,7 +1,7 @@
 KoalaNLP
 ==============
-[![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-scala_2.12.svg?style=flat-square&label=release)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-scala_2.12%22)
-[![API Doc](https://img.shields.io/badge/doc-Java,Kotlin,Scala-blue.svg?style=flat-square)](http://koalanlp.github.io/KoalaNLP/api/koalanlp/index)
+[![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-scala_2.12.svg?style=flat-square&label=release)](http://search.maven.org/search?q=koalanlp-scala_2.12)
+[![API Doc](https://img.shields.io/badge/doc-Java,Kotlin,Scala-blue.svg?style=flat-square)](http://koalanlp.github.io/koalanlp/api/koalanlp/index)
 [![분석기별 품사비교표](https://img.shields.io/badge/%ED%92%88%EC%82%AC-%EB%B9%84%EA%B5%90%ED%91%9C-blue.svg?style=flat-square)](https://docs.google.com/spreadsheets/d/1OGM4JDdLk6URuegFKXg1huuKWynhg_EQnZYgTmG4h0s/edit?usp=sharing)
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
@@ -58,23 +58,24 @@ KoalaNLP
 
 # 사용방법
 상세한 사용법은 [Usage](https://koalanlp.github.io/koalanlp/usage/) 또는 [Kotlin API Doc](http://koalanlp.github.io/koalanlp/api/koalanlp/index.html), 
-[Scala Support API Doc](https://koalanlp.github.io/scala-support/api/)을 참고하십시오.
+[Scala Support API Doc](https://koalanlp.github.io/scala-support/api/kr/bydelta/koala/Implicits$.html)을 참고하십시오.
 
 # Dependency 추가
 
 ## Java 패키지 목록
+
 | 패키지명            | 설명                                                                 |  버전    | License (원본)     |
 | ------------------ | ------------------------------------------------------------------ | ------- | ------------ |
-| `koalanlp-scala`   | Scala를 위한 편의기능 (Implicit conversion 등)                         | [2.11 ![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-scala_2.11.svg?style=flat-square&label=r) <br/> 2.12 ![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-scala_2.12.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-scala%22) | MIT |
-| `koalanlp-kmr`     | 코모란 Wrapper / 분석범위: 형태소                                       | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-kmr.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-kmr%22)         | Apache 2.0 |
-| `koalanlp-eunjeon` | 은전한닢 Wrapper / 분석범위: 형태소 <sup>2-3</sup>                      | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-eunjeon.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-eunjeon%22) | Apache 2.0 |
-| `koalanlp-arirang` | 아리랑 Wrapper / 분석범위: 형태소 <sup>2-1</sup>                        | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-arirang.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-arirang%22) | Apache 2.0 |
-| `koalanlp-rhino`   | RHINO Wrapper / 분석범위: 형태소 <sup>2-1</sup>                        | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-rhino.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-rhino%22)     | GPL v3 |
-| `koalanlp-daon`    | Daon Wrapper / 분석범위: 형태소 <sup>2-1</sup>                         | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-daon.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-daon%22)       | MIT(별도 지정 없음) |
-| `koalanlp-okt`     | Open Korean Text Wrapper / 분석범위: 문장분리, 형태소 <sup>2-3</sup>     | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-okt.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-okt%22)        | Apache 2.0  |
-| `koalanlp-kkma`    | 꼬꼬마 Wrapper / 분석범위: 형태소, 의존구문 <sup>2-1</sup>                | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-kkma.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-kkma%22)       | GPL v2    |
-| `koalanlp-hnn`     | 한나눔 Wrapper / 분석범위: 문장분리, 형태소, 구문분석, 의존구문 <sup>2-1</sup>| Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-hnn.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-hnn%22)        | GPL v3    |
-| `koalanlp-etri`    | ETRI Open API Wrapper / 분석범위: 형태소, 구문분석, 의존구문, 개체명, 의미역 | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-etri.svg?style=flat-square&label=r)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22koalanlp-etri%22)      | MIT<sup>2-2</sup> |
+| `koalanlp-scala`   | Scala를 위한 편의기능 (Implicit conversion 등)                         | [2.11 ![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-scala_2.11.svg?style=flat-square&label=r) <br/> 2.12 ![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-scala_2.12.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-scala) | MIT |
+| `koalanlp-kmr`     | 코모란 Wrapper / 분석범위: 형태소                                       | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-kmr.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-kmr)         | Apache 2.0 |
+| `koalanlp-eunjeon` | 은전한닢 Wrapper / 분석범위: 형태소 <sup>2-3</sup>                      | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-eunjeon.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-eunjeon) | Apache 2.0 |
+| `koalanlp-arirang` | 아리랑 Wrapper / 분석범위: 형태소 <sup>2-1</sup>                        | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-arirang.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-arirang) | Apache 2.0 |
+| `koalanlp-rhino`   | RHINO Wrapper / 분석범위: 형태소 <sup>2-1</sup>                        | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-rhino.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-rhino)     | GPL v3 |
+| `koalanlp-daon`    | Daon Wrapper / 분석범위: 형태소 <sup>2-1</sup>                         | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-daon.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-daon)       | MIT(별도 지정 없음) |
+| `koalanlp-okt`     | Open Korean Text Wrapper / 분석범위: 문장분리, 형태소 <sup>2-3</sup>     | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-okt.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-okt)        | Apache 2.0  |
+| `koalanlp-kkma`    | 꼬꼬마 Wrapper / 분석범위: 형태소, 의존구문 <sup>2-1</sup>                | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-kkma.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-kkma)       | GPL v2    |
+| `koalanlp-hnn`     | 한나눔 Wrapper / 분석범위: 문장분리, 형태소, 구문분석, 의존구문 <sup>2-1</sup>| Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-hnn.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-hnn)        | GPL v3    |
+| `koalanlp-etri`    | ETRI Open API Wrapper / 분석범위: 형태소, 구문분석, 의존구문, 개체명, 의미역 | Java [![Version](https://img.shields.io/maven-central/v/kr.bydelta/koalanlp-etri.svg?style=flat-square&label=r)](http://search.maven.org/search?q=koalanlp-etri)      | MIT<sup>2-2</sup> |
 
 > <sup>주2-1</sup> 꼬꼬마, 한나눔, 아리랑, RHINO 분석기는 타 분석기와 달리 Maven repository에 등재되어 있지 않아, 원래는 수동으로 직접 추가하셔야 합니다.
 > 이 점이 불편하다는 것을 알기에, KoalaNLP는 assembly 형태로 해당 패키지를 포함하여 배포하고 있습니다. 포함된 패키지를 사용하려면, `assembly` classifier를 사용하십시오.
@@ -90,6 +91,7 @@ KoalaNLP
 
 ## SBT
 (버전은 Latest Release 기준입니다. SNAPSHOT을 사용하시려면, `latest.integration`을 사용하세요.)
+
 ```sbtshell
 val koalaVer = "2.0.0"
 
