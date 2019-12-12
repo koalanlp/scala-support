@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 SCALA_VERS=$(cat build.sbt | grep crossScalaVersions | cut -d\" -f2,4,6 --output-delim=$' ')
+LAST_SCALA_VER=$(cat build.sbt | grep scalaVersion | cut -d\" -f2 --output-delim=$' ')
 
 function run_sbt(){
   IDEA_PATH=$(ls -dt1 ~/.IntelliJIdea* | head -n 1)
@@ -53,7 +54,6 @@ ask_proceed()
 
 build_doc()
 {
-    LAST_SCALA_VER=$(cat build.sbt | grep scalaVersion | cut -d\" -f2 --output-delim=$' ')
     SCALA_MINOR_VER=$(echo $LAST_SCALA_VER | cut -d. -f-2)
     DATE=`date +%D`
 
@@ -98,7 +98,7 @@ case $1 in
 
         ask_proceed "RELEASE"
         if [ "${YN,,}" != "p" ]; then
-            run_sbt "sonatypeReleaseAll"
+            run_sbt ++LAST_SCALA_VER sonatypeReleaseAll
         fi
 
         ask_proceed "SET NEXT"

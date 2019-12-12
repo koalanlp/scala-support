@@ -2,7 +2,7 @@ import sbt.librarymanagement
 
 organization := "kr.bydelta"
 name := "koalanlp-scala"
-version := "2.1.0"
+version := "2.1.1-SNAPSHOT"
 
 scalaVersion := "2.13.1"
 crossScalaVersions := Seq("2.11.12", "2.12.9", "2.13.1")
