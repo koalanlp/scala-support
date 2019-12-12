@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 
-SCALA_VERS=$(cat build.sbt | grep crossScalaVersions | cut -d\" -f2,4 --output-delim=$' ')
+SCALA_VERS=$(cat build.sbt | grep crossScalaVersions | cut -d\" -f2,4,6 --output-delim=$' ')
 
 function run_sbt(){
-  if [ -d ~/.IntelliJIdea2018.2 ]
+  IDEA_PATH=$(ls -dt1 ~/.IntelliJIdea* | head -n 1)
+  SCALA_VERSION=$1
+  if [[ "${SCALA_VERSION:2:4}" =~ 2.13.* ]]
   then
-    java -jar ~/.IntelliJIdea2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
+      JAVA_RUNTIME=java
   else
-    java -jar ~/.IdeaIC2018.2/config/plugins/Scala/launcher/sbt-launch.jar $@
+      JAVA_RUNTIME=/usr/lib/jvm/java-8-openjdk-amd64/bin/java
   fi
+
+  echo Launch sbt with $($JAVA_RUNTIME -version 2>&1 | head -n 1) for $SCALA_VERSION
+  $JAVA_RUNTIME -jar $IDEA_PATH/config/plugins/Scala/launcher/sbt-launch.jar $@
 }
 
 extract_version()
@@ -46,6 +51,19 @@ ask_proceed()
     fi
 }
 
+build_doc()
+{
+    LAST_SCALA_VER=$(cat build.sbt | grep scalaVersion | cut -d\" -f2 --output-delim=$' ')
+    SCALA_MINOR_VER=$(echo $LAST_SCALA_VER | cut -d. -f-2)
+    DATE=`date +%D`
+
+    run_sbt ++$LAST_SCALA_VER clean doc
+    git rm -r docs/api
+    mv target/scala-$SCALA_MINOR_VER/api docs
+    touch docs/api/.nojekyll
+    git add docs/api
+    git commit -a -m "Documentation of v$JAR_VER_CURRENT for $SCALA_MINOR_VER at $DATE"
+}
 
 case $1 in
     all)
@@ -56,6 +74,15 @@ case $1 in
         ask_proceed "SET VERSION"
         if [ "${YN,,}" != "p" ]; then
             set_version $JAR_VER_CURRENT
+        fi
+
+        # Upload core and close, because of the dependencies
+        ask_proceed "TEST"
+        if [ "${YN,,}" != "p" ]; then
+            for MODULE in $SCALA_VERS
+            do
+                run_sbt ++$MODULE test
+            done
         fi
 
         # Upload core and close, because of the dependencies
@@ -76,8 +103,7 @@ case $1 in
 
         ask_proceed "SET NEXT"
         if [ "${YN,,}" != "p" ]; then
-            ./doc.sh
-
+            build_doc
             add_incremental_ver
             set_version "$JAR_VER_NEXT-SNAPSHOT"
         fi

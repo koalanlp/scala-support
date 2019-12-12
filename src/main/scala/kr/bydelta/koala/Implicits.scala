@@ -2,11 +2,12 @@ package kr.bydelta.koala
 
 import java.{lang, util}
 
+import kotlin.Pair
 import kotlin.jvm.functions
 import kr.bydelta.koala.data.{Sentence, Word}
 import kr.bydelta.koala.proc._
+import JDKCollectionConvertsCompat.Converters._
 
-import scala.collection.JavaConverters._
 
 object Implicits {
   /** Kotlin Triple [A, B, C] --> (A, B, C) */
@@ -26,7 +27,7 @@ object Implicits {
     new kotlin.Pair(pair._1, pair._2)
 
   /** java.util.List[A] --> Seq[A] */
-  implicit def kotlinListToScalaSeq[A](list: java.util.List[A]): Seq[A] = list.asScala
+  implicit def kotlinListToScalaSeq[A](list: java.util.List[A]): Seq[A] = list.asScala.toSeq
 
   /** java.util.List[A] <-- Seq[A] */
   implicit def scalaListToKotlinList[A](seq: Seq[A]): java.util.List[A] = seq.asJava
@@ -41,24 +42,28 @@ object Implicits {
   implicit def scalaSetToKotlinSet[A](set: Set[A]): java.util.Set[A] = set.asJava
 
   /** 초성 문자를 종성 조합형 문자로 변경하는 Map */
-  lazy val ChoToJong: Map[Char, Char] = ExtUtil.getChoToJong.asScala.map{
+  lazy val ChoToJong: Map[Char, Char] = ExtUtil.getChoToJong.asScala.map {
     case (from, to) => (from.asInstanceOf[Char], to.asInstanceOf[Char])
   }.toMap
 
   /** 초성 조합형 문자열 리스트 (UNICODE 순서) */
-  lazy val HanFirstList: Array[Char] = ExtUtil.getHanFirstList.map{ _.asInstanceOf[Char] }
+  lazy val HanFirstList: Array[Char] = ExtUtil.getHanFirstList.map {
+    _.asInstanceOf[Char]
+  }
 
   /** 중성 조합형 문자열 리스트 (UNICODE 순서) */
-  lazy val HanSecondList: Array[Char] = ExtUtil.getHanSecondList.map{ _.asInstanceOf[Char] }
+  lazy val HanSecondList: Array[Char] = ExtUtil.getHanSecondList.map {
+    _.asInstanceOf[Char]
+  }
 
   /** 종성 조합형 문자열 리스트 (UNICODE 순서). 가장 첫번째는 None (받침 없음) */
-  lazy val HanLastList: Array[Option[Char]] = ExtUtil.getHanLastList.map{
+  lazy val HanLastList: Array[Option[Char]] = ExtUtil.getHanLastList.map {
     case null => Option.empty
     case char: Character => Option(char.asInstanceOf[Char])
   }
 
   /** CanSplitSentence의 Extension */
-  implicit class CanSplitInScala(splitter: CanSplitSentence){
+  implicit class CanSplitInScala(splitter: CanSplitSentence) {
     /**
       * 주어진 문단 [text]를 문장단위로 분리합니다.
       *
@@ -70,7 +75,7 @@ object Implicits {
   }
 
   /** SentenceSplitter의 Extension */
-  object SentenceSplitter{
+  object SentenceSplitter {
     /**
       * 분석결과를 토대로 문장을 분리함.
       *
@@ -91,7 +96,7 @@ object Implicits {
   }
 
   /** CanTag의 Extension */
-  implicit class CanTagInScala(tagger: CanTag){
+  implicit class CanTagInScala(tagger: CanTag) {
     /**
       * 주어진 문단 [text]을 분석하여 품사를 부착하고, 결과로 [List]<[Sentence]> 객체를 돌려줍니다.
       *
@@ -103,7 +108,7 @@ object Implicits {
   }
 
   /** CanAnalyzeInScala의 Extension */
-  implicit class CanAnalyzeInScala[X](parser: CanAnalyzeProperty[X]){
+  implicit class CanAnalyzeInScala[X](parser: CanAnalyzeProperty[X]) {
     /**
       * [sentence]를 분석함. 결과는 각 [Sentence]의 property로 저장됨.
       *
@@ -133,7 +138,7 @@ object Implicits {
   }
 
   /** Char의 Extension */
-  implicit class CharExtension(ch: Char){
+  implicit class CharExtension(ch: Char) {
     /** 현재 문자를 초성, 중성, 종성 자음문자로 분리해 [Triple]을 구성합니다. 종성이 없으면 [Triple._3] 값은 None.
       *
       * ## 사용법
@@ -144,7 +149,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return [Char.isCompleteHangul]이면 문자를 (초성, 중성, Option[종성])으로 나누고, 아니라면 null.
-      * */
+      **/
     def dissembleHangul: (Char, Char, Option[Char]) = {
       val triple = ExtUtil.dissembleHangul(ch)
       triple.getThird match {
@@ -163,7 +168,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return [Char.isChosungJamo]가 참이면 문자를 그대로, [Char.isCompleteHangul]이 참이면 초성 문자를 분리해서 (0x1100-0x1112 대역), 아니라면 None.
-      * */
+      **/
     def getChosung: Option[Char] = ExtUtil.getChosung(ch) match {
       case null => Option.empty
       case char: Character => Option(char.asInstanceOf[Char])
@@ -179,7 +184,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return [Char.isJongsungJamo]가 참이면 문자를 그대로, [Char.isJongsungEnding]이 참이면 종성 문자를 분리해서 (0x11A7-0x11C2 대역), 아니라면 None.
-      * */
+      **/
     def getJongsung: Option[Char] = ExtUtil.getJongsung(ch) match {
       case null => Option.empty
       case char: Character => Option(char.asInstanceOf[Char])
@@ -195,7 +200,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return [Char.isJungsungJamo]가 참이면 문자를 그대로, [Char.isCompleteHangul]이 참이면 중성 문자를 분리해서 (0x1161-0x1175 대역), 아니라면 None.
-      * */
+      **/
     def getJungsung: Option[Char] = ExtUtil.getJungsung(ch) match {
       case null => Option.empty
       case char: Character => Option(char.asInstanceOf[Char])
@@ -212,7 +217,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 해당 범위의 한자라면 true
-      * */
+      **/
     def isCJKHanja: Boolean = ExtUtil.isCJKHanja(ch)
 
     /** 현재 문자가 현대 한글 초성 자음 문자인지 확인합니다.
@@ -225,7 +230,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isChosungJamo: Boolean = ExtUtil.isChosungJamo(ch)
 
     /**
@@ -239,7 +244,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isCompleteHangul: Boolean = ExtUtil.isCompleteHangul(ch)
 
     /** 현재 문자가 한글 완성형 또는 조합용 문자인지 확인합니다.
@@ -252,7 +257,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isHangul: Boolean = ExtUtil.isHangul(ch)
 
     /** 현재 문자가 한자 범위인지 확인합니다.
@@ -265,7 +270,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 한자범위라면 true
-      * */
+      **/
     def isHanja: Boolean = ExtUtil.isHanja(ch)
 
     /** 현재 문자가 불완전한 한글 문자인지 확인합니다.
@@ -278,7 +283,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isIncompleteHangul: Boolean = ExtUtil.isIncompleteHangul(ch)
 
     /** 현재 문자가 종성으로 끝인지 확인합니다.
@@ -291,7 +296,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isJongsungEnding: Boolean = ExtUtil.isJongsungEnding(ch)
 
     /** 현재 문자가 한글 종성 자음 문자인지 확인합니다.
@@ -304,7 +309,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isJongsungJamo: Boolean = ExtUtil.isJongsungJamo(ch)
 
     /** 현재 문자가 현대 한글 중성 모음 문자인지 확인합니다.
@@ -317,12 +322,12 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isJungsungJamo: Boolean = ExtUtil.isJungsungJamo(ch)
   }
 
   /** CharSequence의 Extension */
-  implicit class CharSeqExtension(str: CharSequence){
+  implicit class CharSeqExtension(str: CharSequence) {
     /**
       * 주어진 문자열에서 알파벳이 발음되는 대로 국문 문자열로 표기하여 값으로 돌려줍니다.
       *
@@ -380,7 +385,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return [Char.isCompleteHangul]이 참인 문자는 초성, 중성, 종성 순서로 붙인 새 문자열로 바꾸고, 나머지는 그대로 둔 문자열.
-      * */
+      **/
     def dissembleHangul: CharSequence = ExtUtil.dissembleHangul(str)
 
     /**
@@ -444,7 +449,7 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isHangulEnding: Boolean = ExtUtil.isHangulEnding(str)
 
     /** 현재 문자열이 종성으로 끝인지 확인합니다.
@@ -457,12 +462,12 @@ object Implicits {
       *
       * @since 2.0.0
       * @return 조건에 맞으면 true
-      * */
+      **/
     def isJongsungEnding: Boolean = ExtUtil.isJongsungEnding(str)
   }
 
   /** Iterable[String]의 Extension */
-  implicit class IterStringExtenstion(list: Iterable[String]){
+  implicit class IterStringExtenstion(list: Iterable[String]) {
 
     /**
       * (Extension) 주어진 목록에 주어진 구문구조 표지 [tag]가 포함되는지 확인합니다.
@@ -476,7 +481,7 @@ object Implicits {
       * ```
       *
       * @since 2.0.0
-      * @param tag  속하는지 확인할 구문구조 표지 값
+      * @param tag 속하는지 확인할 구문구조 표지 값
       * @return 목록 중 하나라도 일치한다면 true
       */
     def contains(tag: PhraseTag): Boolean = Util.contains(list, tag)
@@ -534,7 +539,7 @@ object Implicits {
   }
 
   /** (Char, Char, Option[Char])의 Extension */
-  implicit class CharTripleExtension(triple: (Char, Char, Option[Char])){
+  implicit class CharTripleExtension(triple: (Char, Char, Option[Char])) {
 
     /**
       * 초성을 [Triple.first] 문자로, 중성을 [Triple.second] 문자로, 종성을 [Triple.third] 문자로 갖는 한글 문자를 재구성합니다.
@@ -567,14 +572,15 @@ object Implicits {
   /**
     * 사용자 사전의 Scala interface
     */
-  object Dictionary extends CanCompileDict{
+  object Dictionary extends CanCompileDict {
     private var dict: CanCompileDict = _
 
     /**
       * 사용할 사전을 지정합니다.
+      *
       * @param dict 사용할 사전 (Dictionary.INSTANCE)
       */
-    def use(dict: CanCompileDict): Unit ={
+    def use(dict: CanCompileDict): Unit = {
       this.dict = dict
     }
 
@@ -584,7 +590,7 @@ object Implicits {
       * @param pairs 추가할 (표면형, 품사)의 순서쌍들 (가변인자). 즉, [Pair]<[String], [POS]>들
       */
     override def addUserDictionary(pairs: kotlin.Pair[String, _ <: POS]*): Unit =
-      dict.addUserDictionary(pairs:_*)
+      dict.addUserDictionary(pairs: _*)
 
     /**
       * 사용자 사전에, 표면형과 그 품사를 추가합니다.
@@ -668,6 +674,15 @@ object Implicits {
       }).asScala.map(kotlinPairToScalaTuple)
 
     /**
+      * 원본 사전에 등재된 항목 중에서, 지정된 형태소의 항목만을 가져옵니다. (복합 품사 결합 형태는 제외)
+      *
+      * @param pos 선택할 품사들 (가변인자)
+      * @return (형태소, 품사)의 Iterator.
+      */
+    override def getBaseEntriesOfPOS(pos: POS*): util.Iterator[Pair[String, POS]] =
+      dict.getBaseEntriesOfPOS(pos: _*)
+
+    /**
       * 사용자 사전에 등재된 모든 Item을 불러옵니다.
       *
       * @return (형태소, 통합품사)의 Sequence.
@@ -683,7 +698,7 @@ object Implicits {
       */
     override def getNotExists(onlySystemDic: Boolean, word: kotlin.Pair[String, _ <: POS]*):
     Array[kotlin.Pair[String, POS]] =
-      dict.getNotExists(onlySystemDic, word:_*)
+      dict.getNotExists(onlySystemDic, word: _*)
 
     /**
       * 사전에 등재되어 있는지 확인하고, 사전에 없는단어만 반환합니다.
@@ -693,7 +708,7 @@ object Implicits {
       * @return 사전에 없는 단어들, 즉, [Pair]<[String], [POS]>들.
       */
     def getNotExists(onlySystemDic: Boolean, word: (String, POS)*): Array[(String, POS)] =
-      dict.getNotExists(onlySystemDic, word.map(scalaPairToKotlinPair):_*).map(kotlinPairToScalaTuple)
+      dict.getNotExists(onlySystemDic, word.map(scalaPairToKotlinPair): _*).map(kotlinPairToScalaTuple)
 
     /**
       * 다른 사전을 참조하여, 선택된 사전에 없는 단어를 사용자사전으로 추가합니다.
@@ -704,6 +719,16 @@ object Implicits {
       */
     override def importFrom(dict: CanCompileDict, fastAppend: Boolean, filter: POSFilter): Unit =
       this.dict.importFrom(dict, fastAppend, filter)
+
+    /**
+      * 다른 사전을 참조하여, 선택된 사전에 없는 단어를 사용자사전으로 추가합니다.
+      *
+      * @param dict       참조할 사전
+      * @param fastAppend 선택된 사전에 존재하는지를 검사하지 않고, 빠르게 추가하고자 할 때 (기본값 false)
+      * @param pos        추가할 품사의 목록
+      */
+    override def importFromTags(dict: CanCompileDict, fastAppend: Boolean, pos: POS*): Unit =
+      this.dict.importFromTags(dict, fastAppend, pos: _*)
 
     /**
       * 다른 사전을 참조하여, 선택된 사전에 없는 단어를 사용자사전으로 추가합니다.
@@ -722,7 +747,7 @@ object Implicits {
       *
       * - 추가시에 선택된 사전에 존재하는지를 검사하여, 없는 값만 삽입합니다.
       *
-      * @param dict       참조할 사전
+      * @param dict 참조할 사전
       */
     override def importFrom(dict: CanCompileDict): Unit = this.dict.importFrom(dict)
 
@@ -744,4 +769,5 @@ object Implicits {
       this
     }
   }
+
 }

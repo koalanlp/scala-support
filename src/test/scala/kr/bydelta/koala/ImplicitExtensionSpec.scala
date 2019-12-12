@@ -6,13 +6,16 @@ import kr.bydelta.koala.Implicits._
 import org.specs2.execute.Result
 import org.specs2.mutable.Specification
 
-import scala.collection.JavaConverters._
 import scala.util.Random
+import JDKCollectionConvertsCompat.Converters._
 
-object ImplicitExtensionSpec extends Specification {
+class ImplicitExtensionSpec extends Specification {
+  sequential
+
   private val API_KEY = {
-    val key = System.getenv("API_KEY")
-    assert(key != null)
+    val env = System.getenv()
+    val key = env.getOrDefault("API_KEY", env.get("ETRI_KEY"))
+    assert(key != null, "ETRI_KEY 정보가 없습니다!")
     key
   }
 
@@ -22,10 +25,10 @@ object ImplicitExtensionSpec extends Specification {
       val kotlinTriple: kotlin.Triple[String, String, String] = scalaTriple
       val scalaTriple2: (String, String, String) = kotlinTriple
 
-      kotlinTriple.getFirst shouldEqual scalaTriple._1
-      kotlinTriple.getSecond shouldEqual scalaTriple._2
-      kotlinTriple.getThird shouldEqual scalaTriple._3
-      scalaTriple shouldEqual scalaTriple2
+      kotlinTriple.getFirst mustEqual scalaTriple._1
+      kotlinTriple.getSecond mustEqual scalaTriple._2
+      kotlinTriple.getThird mustEqual scalaTriple._3
+      scalaTriple mustEqual scalaTriple2
     }
 
     "correctly convert Pairs" in {
@@ -33,9 +36,9 @@ object ImplicitExtensionSpec extends Specification {
       val kotlinPair: kotlin.Pair[String, String] = scalaPair
       val scalaPair2: (String, String) = kotlinPair
 
-      kotlinPair.getFirst shouldEqual scalaPair._1
-      kotlinPair.getSecond shouldEqual scalaPair._2
-      scalaPair shouldEqual scalaPair2
+      kotlinPair.getFirst mustEqual scalaPair._1
+      kotlinPair.getSecond mustEqual scalaPair._2
+      scalaPair mustEqual scalaPair2
     }
 
     "correctly convert Lists" in {
@@ -53,8 +56,8 @@ object ImplicitExtensionSpec extends Specification {
           val k = kIt.next()
           val s2 = sIt2.next()
 
-          s shouldEqual k
-          s shouldEqual s2
+          s mustEqual k
+          s mustEqual s2
         }
       }
     }
@@ -66,15 +69,15 @@ object ImplicitExtensionSpec extends Specification {
 
       val sIt = scalaSet.iterator
 
-      scalaSet.size shouldEqual kotlinSet.size()
-      scalaSet.size shouldEqual scalaSet2.size
+      scalaSet.size mustEqual kotlinSet.size()
+      scalaSet.size mustEqual scalaSet2.size
 
       Result.unit {
         while (sIt.hasNext) {
           val s = sIt.next()
 
-          kotlinSet.contains(s) should beTrue
-          scalaSet2.contains(s) should beTrue
+          kotlinSet.contains(s) must beTrue
+          scalaSet2.contains(s) must beTrue
         }
       }
     }
@@ -82,7 +85,7 @@ object ImplicitExtensionSpec extends Specification {
 
   "ExtUtil constants" should {
     "have ChoToJong" in {
-      ChoToJong.toSeq should containAllOf(ExtUtil.getChoToJong.asScala.toSeq.map {
+      ChoToJong.toSeq must containAllOf(ExtUtil.getChoToJong.asScala.toSeq.map {
         case (x, y) => (x.asInstanceOf[Char], y.asInstanceOf[Char])
       })
     }
@@ -91,17 +94,17 @@ object ImplicitExtensionSpec extends Specification {
       Result.unit {
         HanFirstList.zipWithIndex.foreach {
           case (ch, i) =>
-            ExtUtil.getHanFirstList.apply(i).asInstanceOf[Char] shouldEqual ch
+            ExtUtil.getHanFirstList.apply(i).asInstanceOf[Char] mustEqual ch
         }
         HanSecondList.zipWithIndex.foreach {
           case (ch, i) =>
-            ExtUtil.getHanSecondList.apply(i).asInstanceOf[Char] shouldEqual ch
+            ExtUtil.getHanSecondList.apply(i).asInstanceOf[Char] mustEqual ch
         }
         HanLastList.zipWithIndex.foreach {
           case (Some(ch), i) =>
-            ExtUtil.getHanLastList.apply(i).asInstanceOf[Char] shouldEqual ch
+            ExtUtil.getHanLastList.apply(i).asInstanceOf[Char] mustEqual ch
           case (None, i) =>
-            ExtUtil.getHanLastList.apply(i) should beNull
+            ExtUtil.getHanLastList.apply(i) must beNull
         }
       }
     }
@@ -118,7 +121,7 @@ object ImplicitExtensionSpec extends Specification {
       Result.unit {
         scalaResult.zipWithIndex.foreach {
           case (r, i) =>
-            r shouldEqual kotlinResult.get(i)
+            r mustEqual kotlinResult.get(i)
         }
       }
     }
@@ -135,7 +138,7 @@ object ImplicitExtensionSpec extends Specification {
       Result.unit {
         scalaResult.zipWithIndex.foreach {
           case (r, i) =>
-            r shouldEqual kotlinResult.get(i)
+            r mustEqual kotlinResult.get(i)
         }
       }
     }
@@ -152,7 +155,7 @@ object ImplicitExtensionSpec extends Specification {
       Result.unit {
         scalaResult.zipWithIndex.foreach {
           case (r, i) =>
-            r shouldEqual kotlinResult.get(i)
+            r mustEqual kotlinResult.get(i)
         }
       }
     }
@@ -169,7 +172,7 @@ object ImplicitExtensionSpec extends Specification {
       Result.unit {
         scalaResult.zipWithIndex.foreach {
           case (r, i) =>
-            r shouldEqual kotlinResult.get(i)
+            r mustEqual kotlinResult.get(i)
         }
       }
     }
@@ -178,25 +181,26 @@ object ImplicitExtensionSpec extends Specification {
   "Dictionary" should {
     Dictionary.use(hnn.Dictionary.INSTANCE)
     "adds a noun" in {
-      Dictionary.addUserDictionary("갑질", POS.NNG) should not(throwAn[Exception])
-      Dictionary.getNotExists(false, "갑질" -> POS.NNG).length shouldEqual 0
-      Dictionary.getNotExists(false, "갑질" -> POS.VX).length should beGreaterThan(0)
+      Dictionary.addUserDictionary("갑질", POS.NNG) must not(throwAn[Exception])
+      Dictionary.getNotExists(false, "갑질" -> POS.NNG).length mustEqual 0
+      Dictionary.getNotExists(false, "갑질" -> POS.VX).length must beGreaterThan(0)
     }
 
     // getItems, getBaseEntries, getNotExists: Abstract (depends on the actual implementation)
     "extracts its system dictionary" in {
-      Dictionary.getBaseEntries(_.isNoun) should not(throwAn[Exception])
-      Dictionary.getBaseEntries(_.isPredicate) should not(throwAn[Exception])
-      Dictionary.getBaseEntries(_.isModifier) should not(throwAn[Exception])
+      Dictionary.getBaseEntries((x: POS) => x.isNoun) must not(throwAn[Exception])
+      Dictionary.getBaseEntriesOfPOS(POS.VV, POS.VA, POS.VCN, POS.VCP, POS.VX) must not(throwAn[Exception])
+      Dictionary.getBaseEntries((x: POS) => x.isModifier) must not(throwAn[Exception])
 
-      val nvms = Dictionary.getBaseEntries(_.isNoun).toSeq
+      val nvms = Dictionary.getBaseEntries((x: POS) => x.isNoun).toSeq
       Result.unit {
-        (0 until 1000).foreach { _ =>
-          print('.')
+        (0 until 1000).foreach { i =>
+          if (i % 100 == 0)
+            println(s"DictionaryImport $i/1000")
           val entry = nvms(Random.nextInt(nvms.size))
           val (surface, pos) = entry
-          Dictionary.contains(surface, Set(pos)) should beTrue
-          Dictionary.getNotExists(true, entry).isEmpty should beTrue
+          Dictionary.contains(surface, Set(pos)) must beTrue
+          Dictionary.getNotExists(true, entry).isEmpty must beTrue
         }
       }
     }
@@ -212,29 +216,30 @@ object ImplicitExtensionSpec extends Specification {
         itemsNotExist.zipWithIndex.foreach {
           case (pair, index) =>
             index % 4 match {
-              case 0 => Dictionary.addUserDictionary(pair) should not(throwAn[Exception])
-              case 1 => Dictionary.addUserDictionary(pair._1, pair._2) should not(throwAn[Exception])
-              case 2 => Dictionary.addUserDictionary(Seq(pair._1), Seq(pair._2)) should not(throwAn[Exception])
+              case 0 => Dictionary.addUserDictionary(pair) must not(throwAn[Exception])
+              case 1 => Dictionary.addUserDictionary(pair._1, pair._2) must not(throwAn[Exception])
+              case 2 => Dictionary.addUserDictionary(Seq(pair._1), Seq(pair._2)) must not(throwAn[Exception])
               case _ =>
-                (Dictionary += pair) should not(throwAn[Exception])
+                (Dictionary += pair) must not(throwAn[Exception])
             }
         }
       }
 
       Result.unit {
         targets.foreach { it =>
-          println(s"Userdic Testing: $it")
-          Dictionary.contains(it._1, Set(it._2)) should beTrue
-          Dictionary.contains(it) should beTrue
+          println(s"Userdic Testing")
+          Dictionary.contains(it._1, Set(it._2)) must beTrue
+          Dictionary.contains(it) must beTrue
         }
       }
 
-      Dictionary.getItems().map(kotlinPairToScalaTuple) should containAllOf(itemsNotExist)
+      Dictionary.getItems().map(kotlinPairToScalaTuple) must containAllOf(itemsNotExist.toIndexedSeq)
     }
 
     // importFrom
     "import from other dictionary" in {
-      Dictionary.importFrom(kmr.Dictionary.INSTANCE) should not(throwAn[Exception])
+      Dictionary.importFrom(kmr.Dictionary.INSTANCE, true, (x: POS) => x.isNoun) must not(throwAn[Exception])
+      Dictionary.importFromTags(kmr.Dictionary.INSTANCE, false, POS.VV) must not(throwAn[Exception])
     }
   }
 
@@ -281,16 +286,16 @@ object ImplicitExtensionSpec extends Specification {
           val originalStr = original.mkString("")
           val koreanStr = korean.mkString("")
 
-          originalStr.alphaToHangul.toString shouldEqual koreanStr
-          koreanStr.hangulToAlpha.toString shouldEqual originalStr
-          koreanStr.isAlphaPronounced should beTrue
+          originalStr.alphaToHangul.toString mustEqual koreanStr
+          koreanStr.hangulToAlpha.toString mustEqual originalStr
+          koreanStr.isAlphaPronounced must beTrue
         }
       }
 
-      "삼성 갤럭시 S9".alphaToHangul.toString shouldEqual "삼성 갤럭시 에스9"
-      "이마트".hangulToAlpha.toString shouldEqual "E마트"
+      "삼성 갤럭시 S9".alphaToHangul.toString mustEqual "삼성 갤럭시 에스9"
+      "이마트".hangulToAlpha.toString mustEqual "E마트"
 
-      "이마트".isAlphaPronounced should beFalse
+      "이마트".isAlphaPronounced must beFalse
     }
   }
 
@@ -583,23 +588,23 @@ object ImplicitExtensionSpec extends Specification {
 
       Result.unit {
         for ((hanja, hangul) <- sample) {
-          hanja.hanjaToHangul().toString shouldEqual hangul
+          hanja.hanjaToHangul().toString mustEqual hangul
         }
       }
 
-      "한 女人이 길을 건넜다".hanjaToHangul(false).toString shouldEqual "한 녀인이 길을 건넜다"
-      "한 女人이 길을 건넜다".hanjaToHangul().toString shouldEqual "한 여인이 길을 건넜다"
+      "한 女人이 길을 건넜다".hanjaToHangul(false).toString mustEqual "한 녀인이 길을 건넜다"
+      "한 女人이 길을 건넜다".hanjaToHangul().toString mustEqual "한 여인이 길을 건넜다"
     }
 
     // Char.isHanja
     "should recognize Hanja" in {
-      '金'.isHanja should beTrue
-      '㹤'.isHanja should beTrue
+      '金'.isHanja must beTrue
+      '㹤'.isHanja must beTrue
 
-      '김'.isHanja should beFalse
+      '김'.isHanja must beFalse
 
       // 부수 보충
-      "⺀⺁⺂⻱⻲⻳".forall(_.isHanja) should beTrue
+      "⺀⺁⺂⻱⻲⻳".forall(_.isHanja) must beTrue
     }
   }
 
@@ -609,15 +614,15 @@ object ImplicitExtensionSpec extends Specification {
     // CharSequence.isHangulEnding,
     // CharSequence.isJongsungEnding
     "should correctly identify Hangul characters" in {
-      'k'.isCompleteHangul should beFalse
-      '車'.isCompleteHangul should beFalse
-      '\u1161'.isCompleteHangul should beFalse
-      '\u1161'.isJungsungJamo should beTrue
+      'k'.isCompleteHangul must beFalse
+      '車'.isCompleteHangul must beFalse
+      '\u1161'.isCompleteHangul must beFalse
+      '\u1161'.isJungsungJamo must beTrue
 
       val hangulSentence = "무조건 한글로 말하라니 이거 참 난감하군"
       Result.unit {
         for (ch <- hangulSentence) {
-          ch.isCompleteHangul should be_!=(ch.isWhitespace)
+          ch.isCompleteHangul must be_!=(ch.isWhitespace)
         }
       }
 
@@ -625,29 +630,29 @@ object ImplicitExtensionSpec extends Specification {
       Result.unit {
         for (ch <- mixedSentence) {
           if ("SN '.:" contains ch) {
-            ch.isCompleteHangul should beFalse
-            ch.isHangul should beFalse
-            ch.isIncompleteHangul should beFalse
-            ch.isChosungJamo should beFalse
-            ch.isJungsungJamo should beFalse
-            ch.isJongsungJamo should beFalse
-            ch.isJongsungEnding should beFalse
+            ch.isCompleteHangul must beFalse
+            ch.isHangul must beFalse
+            ch.isIncompleteHangul must beFalse
+            ch.isChosungJamo must beFalse
+            ch.isJungsungJamo must beFalse
+            ch.isJongsungJamo must beFalse
+            ch.isJongsungEnding must beFalse
           } else if ("ㄱㄴ" contains ch) {
-            ch.isCompleteHangul should beFalse
-            ch.isHangul should beTrue
-            ch.isIncompleteHangul should beTrue
-            ch.isChosungJamo should beFalse
-            ch.isJungsungJamo should beFalse
-            ch.isJongsungJamo should beFalse
-            ch.isJongsungEnding should beFalse
+            ch.isCompleteHangul must beFalse
+            ch.isHangul must beTrue
+            ch.isIncompleteHangul must beTrue
+            ch.isChosungJamo must beFalse
+            ch.isJungsungJamo must beFalse
+            ch.isJongsungJamo must beFalse
+            ch.isJongsungEnding must beFalse
           } else {
-            ch.isCompleteHangul should beTrue
-            ch.isHangul should beTrue
-            ch.isIncompleteHangul should beFalse
-            ch.isChosungJamo should beFalse
-            ch.isJungsungJamo should beFalse
-            ch.isJongsungJamo should beFalse
-            ch.isJongsungEnding should be_==("인플엔핑심각법적안전장는즘갤럭" contains ch)
+            ch.isCompleteHangul must beTrue
+            ch.isHangul must beTrue
+            ch.isIncompleteHangul must beFalse
+            ch.isChosungJamo must beFalse
+            ch.isJungsungJamo must beFalse
+            ch.isJongsungJamo must beFalse
+            ch.isJongsungEnding must be_==("인플엔핑심각법적안전장는즘갤럭" contains ch)
           }
         }
       }
@@ -655,8 +660,8 @@ object ImplicitExtensionSpec extends Specification {
       val fragments = mixedSentence.split(" ")
       Result.unit {
         for (fragment <- fragments) {
-          fragment.isHangulEnding should be_==(!Seq("SNS", "'인플루엔서'", "심각...", "미비:", "갤럭시S").contains(fragment))
-          fragment.isJongsungEnding should be_==(Seq("쇼핑", "법적", "ㄱ씨는", "요즘") contains fragment)
+          fragment.isHangulEnding must be_==(!Seq("SNS", "'인플루엔서'", "심각...", "미비:", "갤럭시S").contains(fragment))
+          fragment.isJongsungEnding must be_==(Seq("쇼핑", "법적", "ㄱ씨는", "요즘") contains fragment)
         }
       }
     }
@@ -668,42 +673,42 @@ object ImplicitExtensionSpec extends Specification {
           if (ch.isCompleteHangul) {
             ch.getChosung match {
               case Some(cho) =>
-                cho.isChosungJamo should beTrue
-                cho.isJungsungJamo should beFalse
-                cho.isJongsungJamo should beFalse
-                cho.getChosung shouldEqual ch.getChosung
-                cho.getJungsung should beNone
-                cho.getJongsung should beNone
+                cho.isChosungJamo must beTrue
+                cho.isJungsungJamo must beFalse
+                cho.isJongsungJamo must beFalse
+                cho.getChosung mustEqual ch.getChosung
+                cho.getJungsung must beNone
+                cho.getJongsung must beNone
               case _ =>
-                false shouldEqual true
+                false mustEqual true
             }
 
             ch.getJungsung match {
               case Some(jung) =>
-                jung.isChosungJamo should beFalse
-                jung.isJungsungJamo should beTrue
-                jung.isJongsungJamo should beFalse
-                jung.getChosung should beNone
-                jung.getJungsung shouldEqual ch.getJungsung
-                jung.getJongsung should beNone
+                jung.isChosungJamo must beFalse
+                jung.isJungsungJamo must beTrue
+                jung.isJongsungJamo must beFalse
+                jung.getChosung must beNone
+                jung.getJungsung mustEqual ch.getJungsung
+                jung.getJongsung must beNone
               case _ =>
-                false shouldEqual true
+                false mustEqual true
             }
 
             ch.getJongsung match {
               case Some(jong) =>
-                jong.isChosungJamo should beFalse
-                jong.isJungsungJamo should beFalse
-                jong.isJongsungJamo should beTrue
-                jong.getChosung should beNone
-                jong.getJungsung should beNone
-                jong.getJongsung shouldEqual ch.getJongsung
+                jong.isChosungJamo must beFalse
+                jong.isJungsungJamo must beFalse
+                jong.isJongsungJamo must beTrue
+                jong.getChosung must beNone
+                jong.getJungsung must beNone
+                jong.getJongsung mustEqual ch.getJongsung
               case _ =>
             }
           } else {
-            ch.getChosung should beNone
-            ch.getJungsung should beNone
-            ch.getJongsung should beNone
+            ch.getChosung must beNone
+            ch.getJungsung must beNone
+            ch.getJongsung must beNone
           }
         }
       }
@@ -736,31 +741,31 @@ object ImplicitExtensionSpec extends Specification {
               it._3.map(_.asInstanceOf[Character]).orNull).toString
           }.mkString("")
 
-          str.isJongsungEnding should be_==(str.last.isJongsungEnding)
-          str.last.isJongsungEnding should be_==(code.last._3.isDefined)
+          str.isJongsungEnding must be_==(str.last.isJongsungEnding)
+          str.last.isJongsungEnding must be_==(code.last._3.isDefined)
 
-          str shouldEqual tupleStr
-          str shouldEqual seqStr
+          str mustEqual tupleStr
+          str mustEqual seqStr
 
-          str.head.getChosung.get shouldEqual code.head._1
-          str.head.getJungsung.get shouldEqual code.head._2
-          str.head.getJongsung shouldEqual code.head._3
+          str.head.getChosung.get mustEqual code.head._1
+          str.head.getJungsung.get mustEqual code.head._2
+          str.head.getJongsung mustEqual code.head._3
 
-          str.dissembleHangul.toString shouldEqual code.flatMap {
+          str.dissembleHangul.toString mustEqual code.flatMap {
             case (a, b, None) => Seq(a, b)
             case (a, b, Some(c)) => Seq(a, b, c)
           }.mkString("")
 
-          str.head.dissembleHangul shouldEqual code(0)
+          str.head.dissembleHangul mustEqual code(0)
         }
       }
 
       {
         ExtUtil.assembleHangul('a', 'b')
-      } should throwA[IllegalArgumentException]
+      } must throwA[IllegalArgumentException]
 
       val sampleString = "SNS '인플루엔서' 쇼핑 피해 심각... 법적 안전장치 미비: ㄱ씨는 요즘 ㄴ SNS에서 갤럭시S \u1100\u1100 \u11A8\u11A8"
-      sampleString.dissembleHangul.assembleHangul.toString shouldEqual sampleString
+      sampleString.dissembleHangul.assembleHangul.toString mustEqual sampleString
     }
   }
 
@@ -883,15 +888,15 @@ object ImplicitExtensionSpec extends Specification {
 
             eomi.split("/").flatMap { str =>
               if ("ㄴㅂㄹㅁ" contains str.head) {
-                Seq(str, ChoToJong(str.head) + str.drop(1)).map { it =>
+                Seq(str, s"${ChoToJong(str.head)}${str.drop(1)}").map { it =>
                   ((root, isVerb, it), result)
                 }
               } else if (str.head == 'ㅏ') {
-                Seq(ExtUtil.assembleHangul(HanFirstList(11), HanSecondList(0)) + str.drop(1)).map { it =>
+                Seq(s"${ExtUtil.assembleHangul(HanFirstList(11), HanSecondList(0))}${str.drop(1)}").map { it =>
                   ((root, isVerb, it), result)
                 }
               } else if (str.head == 'ㅓ') {
-                Seq(ExtUtil.assembleHangul(HanFirstList(11), HanSecondList(4)) + str.drop(1)).map { it =>
+                Seq(s"${ExtUtil.assembleHangul(HanFirstList(11), HanSecondList(4))}${str.drop(1)}").map { it =>
                   ((root, isVerb, it), result)
                 }
               } else
@@ -904,7 +909,7 @@ object ImplicitExtensionSpec extends Specification {
         map.foreach {
           case ((verb, isVerb, rest), result) =>
 
-            ExtUtil.correctVerbApply(verb, isVerb, rest) shouldEqual result
+            ExtUtil.correctVerbApply(verb, isVerb, rest) mustEqual result
         }
       }
     }

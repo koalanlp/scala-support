@@ -1,13 +1,18 @@
 language: scala
-scala:
-  - 2.11.0
-  - 2.12.0
-jdk:
-  - openjdk12
+matrix:
+  - name: "Scala 2.11 w/ JDK 11"
+    scala: 2.11.12
+    jdk: openjdk11
+  - name: "Scala 2.12 w/ JDK 13"
+    scala: 2.12.9
+    jdk: openjdk13
+  - name: "Scala 2.13 w/ JDK 13"
+    scala: 2.13.1
+    jdk: openjdk13
 script:
   - sbt -J-Xmx4g ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - if [ $TRAVIS_SCALA_VERSION == "2.13.1" ]; then bash <(curl -s https://codecov.io/bash); fi
 env:
   global:
   - secure: v2syKSa34C9qABysqXMmK5o1da8Aye0AoKH7Xj9jaTpHNwsVIpjYXB4ysdJ1AM5bXjNx4CwKTt5z086vehyaKEkqciRYrZJR3Au6EP4SxFmYynecWE/Hs/8BmsNMxqC90h9jspH8P8rvGGkUXKa7nDR3W5I73qzrW2DiRytblIspS/0K9VrkIM09GPSEclllkMUKSy1wl2Iyu7eYWcsMUnU34GHpt5Lx0DtIGZ3snefBtAN0Eszp2hx7Y9WpMjxq1V0WscQGFCJRjCvaR6Y8xHZ92MLcsPlXk1aLGDgiQ1LTw8Z1vh2yYP2sUVCVbfuZ5xYfQnyew9hDQN5LRnq7ch8a9v9Z5oHWhm+17S0go06xq3r93ibK1BsWuDSUpyfhdV0VdNgEPxDjfkmm5I7PCERHwClUBi1hGilFpboxglE/Nih9CZ4vost8w6MRtNE/h4tZrVQpdIKqffFtBgB4rgrE2LKJpuftcyWAEw2Rm35wy81vkt/p47nwNJ9a9V/cLaUN/+PkfWYjMyFoe6QrAjaiPd6ndcj6cuXS6hjLv7jCKIokkFs/bEMg3lUZkhFHLQBE33fctV6qWfzFyhpR4ArB3tHFOBLWbZfJqmoTx5MLoLS8Mw9aV4OQlynQVKNNdpD3dnabQBXEOcp2OniUErTPo7gf704BQTNMcgDq8Ls=

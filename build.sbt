@@ -2,10 +2,10 @@ import sbt.librarymanagement
 
 organization := "kr.bydelta"
 name := "koalanlp-scala"
-version := "2.0.3-SNAPSHOT"
+version := "2.1.0"
 
-scalaVersion := "2.12.0"
-crossScalaVersions := Seq("2.11.0", "2.12.0", "2.13.0")
+scalaVersion := "2.13.1"
+crossScalaVersions := Seq("2.11.12", "2.12.9", "2.13.1")
 autoAPIMappings := true
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-language:implicitConversions")
@@ -15,11 +15,11 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= Seq(
-  "kr.bydelta" % "koalanlp-core" % "2.0.2",
-  "kr.bydelta" % "koalanlp-hnn" % "2.0.2" % "test" classifier "assembly",
-  "kr.bydelta" % "koalanlp-kmr" % "2.0.2" % "test",
-  "kr.bydelta" % "koalanlp-etri" % "2.0.2" % "test",
-  "org.specs2" %% "specs2-core" % "3.9.5" % "test"
+  "kr.bydelta" % "koalanlp-core" % "2.1.2",
+  "kr.bydelta" % "koalanlp-hnn" % "2.1.3" % "test" classifier "assembly",
+  "kr.bydelta" % "koalanlp-kmr" % "2.1.2" % "test",
+  "kr.bydelta" % "koalanlp-etri" % "2.1.2" % "test",
+  "org.specs2" %% "specs2-core" % "4.8.1" % "test"
 )
 
 publishArtifact in Test := false
